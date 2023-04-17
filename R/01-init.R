@@ -21,11 +21,23 @@ library(data.table)
 library(here)
 library(haven)
 
-# load curated dataset (stata)
+# load curated dataset in stata proprietary format
 #
-mata <- read_dta('stata/bases/Stata/02_MATAEA_final.dta')
+# In R, stata labels are stored in object attributes as follows:
+# 
+# > attr(mata$archipelago, 'label')
+# returns the label of variable archipelago
+# 
+# > attr(mata$archipelago, 'labels')
+# returns the table of value labels for that variable
+#
+mata <- data.table(read_dta(here('stata/bases/Stata/02_MATAEA_final.dta')))
+geo <- data.table(read_dta(here('stata/bases/Stata/Mataea Liste ID Commune.dta')))
 
+# check for dups
+sum(duplicated(mata$subjid))==0
 
 # save R binary
-save(mata, file = 'data/mata.rdata')
+save(mata, file = here('data/mata.rdata'))
+save(geo, file = here('data/geo.rdata'))
 
