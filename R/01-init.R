@@ -21,7 +21,7 @@ library(data.table)
 library(here)
 library(haven)
 
-# load curated dataset in stata proprietary format
+# load curated datasets in stata proprietary format
 #
 # In R, stata labels are stored in object attributes as follows:
 # 

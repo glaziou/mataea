@@ -1,0 +1,124 @@
+--- 
+title: "MATA'EA, French Polynesia"
+subtitle: "Measurements of BMI"
+output:  
+  html_document: 
+  mode: selfcontained
+toc: yes 
+toc_float: true
+number_sections: false
+theme: flatly
+fig_width: 12 
+fig_caption: FALSE 
+lang: fr
+--- 
+  
+```{r setup, include=FALSE} 
+# Chapter 1
+# Set options, load data, utility functions 
+knitr::opts_chunk$set(
+  echo = FALSE,
+  results = "asis",
+  message = FALSE,
+  warning = FALSE
+)
+library(data.table)
+library(here)
+library(haven)
+library(knitr)
+library(gtsummary)
+library(flextable)
+library(survey)
+library(gt)
+load(here('data/mata.rdata'))
+theme_gtsummary_language('en')
+theme_gtsummary_journal('lancet')
+```
+
+
+### Prevalence of obesity (WHO definition)
+
+
+```{r tab_1_1}
+
+mata$obese <- haven::as_factor(mata$obesity_who_bool)
+levels(mata$obese)[2] <- "Obesity (WHO)"
+
+d1 <- survey::svydesign(
+  id = ~ subjid,
+  weights = ~ w,
+  strata = ~ geo + agegr,
+  data = mata[obesity_who_bool<99, .(subjid,
+                                  w = weighting,
+                                  geo = haven::as_factor(archipelago),
+                                  agegr = haven::as_factor(age_cat),
+                                  sex = haven::as_factor(gender),
+                                  obese)]
+)
+
+
+t1.1 <- tbl_svysummary(d1,
+               include = c(obese),
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Prevalence (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='level', level_value = 'No') |>
+  remove_row_type(type='level', level_value = 'Missing data') |>
+  remove_row_type(type='header')
+print(t1.1)
+
+# as_gt(t1.1) |> gt::gtsave(filename = here("output/t1_1.rtf"))
+# as_gt(t1.1) |> gt::gtsave(filename = here("output/t1_1.docx"))
+```
+
+
+
+### Table 1.2 Obesity by age and sex
+
+```{r tab_1_2}
+
+tab <- svyby( ~ obese, ~ agegr + sex, d1, svymean, vartype = c("ci"))
+tab[, c(4,7,10)] <- round(tab[, c(4,7,10)] * 100)
+tab <- tab[, c(1:2,4,7,10)]
+names(tab) <- c('Age', 'Sex', 'Obesity', 'lo', 'hi')
+tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
+names(tab)[6] <- "Obesity (IC 95%)"
+rownames(tab) <- NULL
+tab <- tab[, c(1:2, 6)]
+gt::gt(tab, groupname_col = 'Sex') |> 
+ gt::tab_style(
+     locations = cells_column_labels(columns = everything()),
+     style     = list(
+       cell_text(weight = "bold")
+     )
+   )
+  
+```
+
+
+### Table 1.3 Obesity by archipelago
+
+```{r tab_1_3}
+
+tab <- svyby( ~ obese, ~ geo, d1, svymean, vartype = c("ci"))
+tab[, c(3,6,9)] <- round(tab[, c(3,6,9)] * 100)
+tab <- tab[, c(1,3,6,9)]
+names(tab) <- c('Archipelago', 'Obesity', 'lo', 'hi')
+tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
+names(tab)[5] <- "Obesity (IC 95%)"
+rownames(tab) <- NULL
+tab <- tab[, c(1, 5)]
+gt::gt(tab) |> 
+ gt::tab_style(
+     locations = cells_column_labels(columns = everything()),
+     style     = list(
+       cell_text(weight = "bold")
+     )
+   )
+  
+```
