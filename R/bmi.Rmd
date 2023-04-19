@@ -31,29 +31,7 @@ library(gt)
 theme_gtsummary_language('en')
 theme_gtsummary_journal('lancet')
 
-load(here('data/mata.rdata'))
-
-# data preparation
-mata$obese <- haven::as_factor(mata$obesity_who_bool)
-levels(mata$obese)[2] <- "Obesity (WHO)"
-mata$bm <- haven::as_factor(mata$obesity_classif_who2)
-mata$overweight <-
-  factor(mata$bm,
-         labels = c('No', 'No', 'Overweight', 'Overweight', 'Missing data'))
-
-mata[is.na(bmi), bm := NA]
-mata[is.na(bmi), obese := NA]
-mata[is.na(bmi), overweight := NA]
-mata$bm <- droplevels(mata$bm)
-mata$obese <- droplevels(mata$obese)
-mata$overweight <- droplevels(mata$overweight)
-
-# update weights
-out <- mata[, .(N=N[1], miss.bmi = sum(is.na(bmi)), w1=w1[1]), by=.(geo, agegr, sex)]
-out[, w2 := 1 / (1 - miss.bmi/N)]
-out[, w := w1 * w2]
-
-mata <- merge(mata, out[, .(geo, agegr, sex, w1, w2, w)], by=c('geo','agegr','sex'), all.x=T)
+load(here('data/rep.rdata'))
 
 ```
 

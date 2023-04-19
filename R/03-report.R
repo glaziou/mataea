@@ -18,12 +18,9 @@
 #' Generate html report
 #' 
 
+library(data.table)
 library(here)
 library(rmarkdown)
-
-
-# load datasets and utility functions
-load('data/mata.Rdata')
 
 
 # generate html pages for BMI measurements
