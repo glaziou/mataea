@@ -28,18 +28,32 @@ library(gtsummary)
 library(flextable)
 library(survey)
 library(gt)
-load(here('data/mata.rdata'))
 theme_gtsummary_language('en')
 theme_gtsummary_journal('lancet')
 
+load(here('data/mata.rdata'))
 
 # data preparation
 mata$obese <- haven::as_factor(mata$obesity_who_bool)
 levels(mata$obese)[2] <- "Obesity (WHO)"
-mata$bm <- as_factor(mata$obesity_classif_who2)
+mata$bm <- haven::as_factor(mata$obesity_classif_who2)
 mata$overweight <-
   factor(mata$bm,
          labels = c('No', 'No', 'Overweight', 'Overweight', 'Missing data'))
+
+mata[is.na(bmi), bm := NA]
+mata[is.na(bmi), obese := NA]
+mata[is.na(bmi), overweight := NA]
+mata$bm <- droplevels(mata$bm)
+mata$obese <- droplevels(mata$obese)
+mata$overweight <- droplevels(mata$overweight)
+
+# update weights
+out <- mata[, .(N=N[1], miss.bmi = sum(is.na(bmi)), w1=w1[1]), by=.(geo, agegr, sex)]
+out[, w2 := 1 / (1 - miss.bmi/N)]
+out[, w := w1 * w2]
+
+mata <- merge(mata, out[, .(geo, agegr, sex, w1, w2, w)], by=c('geo','agegr','sex'), all.x=T)
 
 ```
 
@@ -56,10 +70,10 @@ d1 <- survey::svydesign(
   weights = ~ w,
   strata = ~ geo + agegr,
   data = mata[obesity_who_bool<99, .(subjid,
-                                  w = weighting,
-                                  geo = haven::as_factor(archipelago),
-                                  agegr = haven::as_factor(age_cat),
-                                  sex = haven::as_factor(gender),
+                                  w,
+                                  geo,
+                                  agegr,
+                                  sex,
                                   obesity_who_bool,
                                   bm,
                                   overweight,
@@ -69,6 +83,7 @@ d1 <- survey::svydesign(
 
 tbl_svysummary(d1,
                include = c(bm),
+               missing='no',
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "") |>
   add_ci(
@@ -78,7 +93,6 @@ tbl_svysummary(d1,
   modify_header(stat_0 = "**Prevalence (95% CI)**") |>
   bold_labels() |>
   remove_row_type(type='level', level_value = 'No') |>
-  remove_row_type(type='level', level_value = 'Missing data') |>
   remove_row_type(type='header')
 
 ```
@@ -90,6 +104,7 @@ tbl_svysummary(d1,
 
 tbl_svysummary(d1,
                include = c(bm),
+               missing = 'no',
                by = sex,
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "") |>
@@ -99,7 +114,6 @@ tbl_svysummary(d1,
   )  |>
   bold_labels() |>
   remove_row_type(type='level', level_value = 'No') |>
-  remove_row_type(type='level', level_value = 'Missing data') |>
   remove_row_type(type='header')
 
 ```
@@ -111,6 +125,7 @@ tbl_svysummary(d1,
 
 tbl_svysummary(d1,
                include = c(bm),
+               missing = 'no',
                by = agegr,
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "") |>
@@ -120,7 +135,6 @@ tbl_svysummary(d1,
   )  |>
   bold_labels() |>
   remove_row_type(type='level', level_value = 'No') |>
-  remove_row_type(type='level', level_value = 'Missing data') |>
   remove_row_type(type='header')
 
 ```
@@ -131,6 +145,7 @@ tbl_svysummary(d1,
 
 tbl_svysummary(d1,
                include = c(bm),
+               missing = 'no',
                by = geo,
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "") |>
@@ -140,7 +155,6 @@ tbl_svysummary(d1,
   )  |>
   bold_labels() |>
   remove_row_type(type='level', level_value = 'No') |>
-  remove_row_type(type='level', level_value = 'Missing data') |>
   remove_row_type(type='header')
 
 ```
@@ -157,6 +171,7 @@ tbl_svysummary(d1,
 
 tbl_svysummary(d1,
                include = c(overweight),
+               missing = 'no',
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "") |>
   add_ci(
@@ -166,7 +181,6 @@ tbl_svysummary(d1,
   modify_header(stat_0 = "**Prevalence (95% CI)**") |>
   bold_labels() |>
   remove_row_type(type='level', level_value = 'No') |>
-  remove_row_type(type='level', level_value = 'Missing data') |>
   remove_row_type(type='header')
 
 ```
@@ -177,8 +191,8 @@ tbl_svysummary(d1,
 ```{r tab_1_2_2}
 
 tab <- svyby( ~ overweight, ~ sex, d1, svymean, vartype = c("ci"))
-tab[, c(3,6,9)] <- round(tab[, c(3,6,9)] * 100)
-tab <- tab[, c(1,3,6,9)]
+tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
+tab <- tab[, c(1,3,5,7)]
 names(tab) <- c('Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
 names(tab)[5] <- "Obesity (IC 95%)"
@@ -199,8 +213,8 @@ gt::gt(tab, groupname_col = 'Sex') |>
 ```{r tab_1_2_3}
 
 tab <- svyby( ~ overweight, ~ agegr + sex, d1, svymean, vartype = c("ci"))
-tab[, c(4,7,10)] <- round(tab[, c(4,7,10)] * 100)
-tab <- tab[, c(1:2,4,7,10)]
+tab[, c(4,6,8)] <- round(tab[, c(4,6,8)] * 100)
+tab <- tab[, c(1:2,4,6,8)]
 names(tab) <- c('Age', 'Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
 names(tab)[6] <- "Obesity (IC 95%)"
@@ -222,8 +236,8 @@ gt::gt(tab, groupname_col = 'Sex') |>
 ```{r tab_1_2_4}
 
 tab <- svyby( ~ overweight, ~ geo, d1, svymean, vartype = c("ci"))
-tab[, c(3,6,9)] <- round(tab[, c(3,6,9)] * 100)
-tab <- tab[, c(1,3,6,9)]
+tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
+tab <- tab[, c(1,3,5,7)]
 names(tab) <- c('Archipelago', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
 names(tab)[5] <- "Obesity (IC 95%)"
@@ -256,6 +270,7 @@ gt::gt(tab) |>
 
 tbl_svysummary(d1,
                include = c(obese),
+               missing = 'no',
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "") |>
   add_ci(
@@ -265,7 +280,6 @@ tbl_svysummary(d1,
   modify_header(stat_0 = "**Prevalence (95% CI)**") |>
   bold_labels() |>
   remove_row_type(type='level', level_value = 'No') |>
-  remove_row_type(type='level', level_value = 'Missing data') |>
   remove_row_type(type='header')
 
 # as_gt(t1.1) |> gt::gtsave(filename = here("output/t1_1.rtf"))
@@ -279,8 +293,8 @@ tbl_svysummary(d1,
 ```{r tab_1_3_2}
 
 tab <- svyby( ~ obese, ~ sex, d1, svymean, vartype = c("ci"))
-tab[, c(3,6,9)] <- round(tab[, c(3,6,9)] * 100)
-tab <- tab[, c(1,3,6,9)]
+tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
+tab <- tab[, c(1,3,5,7)]
 names(tab) <- c('Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
 names(tab)[5] <- "Obesity (IC 95%)"
@@ -301,8 +315,8 @@ gt::gt(tab, groupname_col = 'Sex') |>
 ```{r tab_1_3_3}
 
 tab <- svyby( ~ obese, ~ agegr + sex, d1, svymean, vartype = c("ci"))
-tab[, c(4,7,10)] <- round(tab[, c(4,7,10)] * 100)
-tab <- tab[, c(1:2,4,7,10)]
+tab[, c(4,6,8)] <- round(tab[, c(4,6,8)] * 100)
+tab <- tab[, c(1:2,4,6,8)]
 names(tab) <- c('Age', 'Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
 names(tab)[6] <- "Obesity (IC 95%)"
@@ -324,8 +338,8 @@ gt::gt(tab, groupname_col = 'Sex') |>
 ```{r tab_1_3_4}
 
 tab <- svyby( ~ obese, ~ geo, d1, svymean, vartype = c("ci"))
-tab[, c(3,6,9)] <- round(tab[, c(3,6,9)] * 100)
-tab <- tab[, c(1,3,6,9)]
+tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
+tab <- tab[, c(1,3,5,7)]
 names(tab) <- c('Archipelago', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
 names(tab)[5] <- "Obesity (IC 95%)"
