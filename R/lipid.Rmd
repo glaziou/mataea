@@ -1,0 +1,659 @@
+--- 
+title: "MATA'EA, French Polynesia"
+subtitle: "Lipid profiles"
+output:  
+  html_document: 
+    mode: selfcontained
+    toc: yes 
+    toc_float: true
+    number_sections: false
+    theme: flatly
+fig_width: 12 
+fig_caption: FALSE 
+--- 
+  
+```{r setup, include=FALSE} 
+# Chapter 1
+# Set options, load data, utility functions 
+knitr::opts_chunk$set(
+  echo = FALSE,
+  results = "asis",
+  message = FALSE,
+  warning = FALSE
+)
+library(data.table)
+library(here)
+library(haven)
+library(knitr)
+library(gtsummary)
+library(flextable)
+library(survey)
+library(gt)
+theme_gtsummary_language('en')
+theme_gtsummary_journal('lancet')
+
+load(here('data/rep.rdata'))
+
+```
+
+
+## 2.1 Cholesterol results
+
+### Table 2.1.1 Cholesterol categories
+
+```{r tab_2_1_1}
+
+d2 <- survey::svydesign(
+  id = ~ subjid,
+  weights = ~ w.lipid,
+  strata = ~ geo + agegr,
+  data = mata[!is.na(chol), .(subjid,
+                              w.lipid,
+                              geo,
+                              agegr,
+                              sex,
+                              bmi,
+                              bm,
+                              bm2,
+                              overweight,
+                              obese,
+                              tg,
+                              chol,
+                              hdl,
+                              hdl.ratio,
+                              ldl,
+                              hdlldl.ratio)]
+)
+
+
+tbl_svysummary(d2,
+               include = c(chol),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Cholesterol (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.1.2 Cholesterol by sex
+
+```{r tab_2_1_2}
+tbl_svysummary(d2,
+               include = c(chol),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.1.3 Cholesterol by age
+
+```{r tab_2_1_3}
+
+tbl_svysummary(d2,
+               include = c(chol),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.1.4 Cholesterol by archipelago
+
+```{r tab_2_1_4}
+
+tbl_svysummary(d2,
+               include = c(chol),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.1.5 Cholesterol by body mass categories
+
+```{r tab_2_1_5}
+
+tbl_svysummary(d2,
+               include = c(chol),
+               missing = 'no',
+               by = bm2,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+## 2.2 Triglycerids results
+
+### Table 2.2.1 Triglycerids categories
+
+```{r tab_2_2_1}
+
+tbl_svysummary(d2,
+               include = c(tg),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Blood cholesterol (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.2.2 Triglycerids by sex
+
+```{r tab_2_2_2}
+
+tbl_svysummary(d2,
+               include = c(tg),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Triglycerids**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.2.3 Triglycerids by age
+
+```{r tab_2_2_3}
+
+tbl_svysummary(d2,
+               include = c(tg),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Triglycerids**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.2.4 Triglycerids by archipelago
+
+```{r tab_2_2_4}
+
+tbl_svysummary(d2,
+               include = c(tg),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Triglycerids**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.2.5 Triglycerids by body mass categories
+
+```{r tab_2_2_5}
+
+tbl_svysummary(d2,
+               include = c(tg),
+               missing = 'no',
+               by = bm2,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Triglycerids**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+## 2.3 Cholesterol HDL results
+
+### Table 2.3.1 Cholesterol HDL categories
+
+```{r tab_2_3_1}
+
+tbl_svysummary(d2,
+               include = c(hdl),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Cholesterol HDL (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.3.2 Cholesterol HDL by sex
+
+```{r tab_2_3_2}
+tbl_svysummary(d2,
+               include = c(hdl),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.3.3 Cholesterol HDL by age
+
+```{r tab_2_3_3}
+
+tbl_svysummary(d2,
+               include = c(hdl),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.3.4 Cholesterol HDL by archipelago
+
+```{r tab_2_3_4}
+
+tbl_svysummary(d2,
+               include = c(hdl),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.3.5 Cholesterol HDL by body mass categories
+
+```{r tab_2_3_5}
+
+tbl_svysummary(d2,
+               include = c(hdl),
+               missing = 'no',
+               by = bm2,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+## 2.4 Ratio total cholesterol / HDL
+
+### Table 2.4.1 Cholesterol/HDL ratio categories
+
+```{r tab_2_4_1}
+
+tbl_svysummary(d2,
+               include = c(hdl.ratio),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Cholesterol/HDL (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.4.2 Cholesterol/HDL ratio by sex
+
+```{r tab_2_4_2}
+tbl_svysummary(d2,
+               include = c(hdl.ratio),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol/HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.4.3 Cholesterol/HDL ratio by age
+
+```{r tab_2_4_3}
+
+tbl_svysummary(d2,
+               include = c(hdl.ratio),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol/HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.4.4 Cholesterol/HDL ratio by archipelago
+
+```{r tab_2_4_4}
+
+tbl_svysummary(d2,
+               include = c(hdl.ratio),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol/HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.4.5 Cholesterol/HDL ratio by body mass categories
+
+```{r tab_2_4_5}
+
+tbl_svysummary(d2,
+               include = c(hdl.ratio),
+               missing = 'no',
+               by = bm2,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol/HDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+
+
+
+## 2.5 Cholesterol LDL results
+
+### Table 2.5.1 Cholesterol LDL categories
+
+```{r tab_2_5_1}
+
+tbl_svysummary(d2,
+               include = c(ldl),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Cholesterol LDL (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.5.2 Cholesterol LDL by sex
+
+```{r tab_2_5_2}
+tbl_svysummary(d2,
+               include = c(ldl),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.5.3 Cholesterol LDL by age
+
+```{r tab_2_5_3}
+
+tbl_svysummary(d2,
+               include = c(ldl),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.5.4 Cholesterol LDL by archipelago
+
+```{r tab_2_5_4}
+
+tbl_svysummary(d2,
+               include = c(ldl),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.5.5 Cholesterol LDL by body mass categories
+
+```{r tab_2_5_5}
+
+tbl_svysummary(d2,
+               include = c(ldl),
+               missing = 'no',
+               by = bm2,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Cholesterol LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+## 2.6 HDL/LDL cholesterol ratio
+
+### Table 2.6.1 HDL/LDL cholesterol ratio categories
+
+```{r tab_2_6_1}
+
+tbl_svysummary(d2,
+               include = c(hdlldl.ratio),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**HDL/LDL (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.6.2 HDL/LDL cholesterol ratio by sex
+
+```{r tab_2_6_2}
+tbl_svysummary(d2,
+               include = c(hdlldl.ratio),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**HDL/LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.6.3 HDL/LDL cholesterol ratio by age
+
+```{r tab_2_6_3}
+
+tbl_svysummary(d2,
+               include = c(hdlldl.ratio),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**HDL/LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 2.6.4 HDL/LDL cholesterol ratio by archipelago
+
+```{r tab_2_6_4}
+
+tbl_svysummary(d2,
+               include = c(hdlldl.ratio),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**HDL/LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 2.6.5 HDL/LDL cholesterol ratio by body mass categories
+
+```{r tab_2_6_5}
+
+tbl_svysummary(d2,
+               include = c(hdlldl.ratio),
+               missing = 'no',
+               by = bm2,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**HDL/LDL**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+

@@ -1,5 +1,6 @@
 --- 
 title: "MATA'EA, French Polynesia"
+subtitle: "Body mass"
 output:  
   html_document: 
     mode: selfcontained

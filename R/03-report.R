@@ -23,11 +23,17 @@ library(here)
 library(rmarkdown)
 
 
-# generate html pages for BMI measurements
-#
+# BMI measurements
 system.time(rmarkdown::render(
   here('R/bmi.Rmd'),
   output_dir = here('html'),
   output_file = 'bmi.html'
+))
+
+# lipid profile
+system.time(rmarkdown::render(
+  here('R/lipid.Rmd'),
+  output_dir = here('html'),
+  output_file = 'lipid.html'
 ))
 

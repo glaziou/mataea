@@ -38,6 +38,7 @@ mata[is.na(bmi), bm := NA]
 mata[is.na(bmi), obese := NA]
 mata[is.na(bmi), overweight := NA]
 mata$bm <- droplevels(mata$bm)
+mata$bm2 <- forcats::fct_explicit_na(mata$bm, na_level = "(Missing)")
 mata$obese <- droplevels(mata$obese)
 mata$overweight <- droplevels(mata$overweight)
 
@@ -55,6 +56,54 @@ mata <-
         by = c('geo', 'agegr', 'sex'),
         all.x = T)
 
+
+
+#-------------------------------------
+# Lipid profile
+#-------------------------------------
+mata$tg <- haven::as_factor(mata$res_tg_cat)
+mata[res_tg_cat==99, tg := NA]
+mata$tg <- droplevels(mata$tg)
+res <- c('Below normal','Normal','Above normal')
+levels(mata$tg) <- res
+
+mata$chol <- haven::as_factor(mata$res_ct_cat)
+mata[res_ct_cat==99, chol := NA]
+mata$chol <- droplevels(mata$chol)
+levels(mata$chol) <- res
+
+mata$hdl <- haven::as_factor(mata$res_hdl_hdl_cat)
+mata[res_hdl_hdl_cat==99, hdl := NA]
+mata$hdl <- droplevels(mata$hdl)
+levels(mata$hdl) <- res
+
+mata$hdl.ratio <- haven::as_factor(mata$res_hdl_rcthd_cat)
+mata[res_hdl_rcthd_cat==99, hdl.ratio := NA]
+mata$hdl.ratio <- droplevels(mata$hdl.ratio)
+levels(mata$hdl.ratio) <- c('Normal','Above normal')
+
+mata$ldl <- haven::as_factor(mata$res_ldlc_ldlc_cat)
+mata[res_ldlc_ldlc_cat==99, ldl := NA]
+mata$ldl <- droplevels(mata$ldl)
+levels(mata$ldl) <- res
+
+mata$hdlldl.ratio <- haven::as_factor(mata$res_ldlc_rhdld_cat)
+mata[res_ldlc_rhdld_cat==99, hdlldl.ratio := NA]
+mata$hdlldl.ratio <- droplevels(mata$hdlldl.ratio)
+levels(mata$hdlldl.ratio) <- res
+
+
+# update weights
+out <-
+  mata[, .(miss.lipid = sum(is.na(chol))), by = .(geo, agegr, sex)]
+
+mata <-
+  merge(mata,
+        out[, .(geo, agegr, sex, miss.lipid)],
+        by = c('geo', 'agegr', 'sex'),
+        all.x = T)
+mata[, w3 := 1 / (1 - miss.lipid / N)]
+mata[, w.lipid := w1 * w3]
 
 
 
