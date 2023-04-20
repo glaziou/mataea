@@ -174,16 +174,16 @@ tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
 tab <- tab[, c(1,3,5,7)]
 names(tab) <- c('Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
-names(tab)[5] <- "Obesity (IC 95%)"
+names(tab)[5] <- "Obesity (95% CI)"
 rownames(tab) <- NULL
 tab <- tab[, c(1, 5)]
-gt::gt(tab, groupname_col = 'Sex') |> 
- gt::tab_style(
-     locations = cells_column_labels(columns = everything()),
-     style     = list(
-       cell_text(weight = "bold")
-     )
-   )
+gt::gt(tab, groupname_col = 'Sex') |>
+  gt::tab_style(locations = cells_column_labels(columns = everything()),
+                style     = list(cell_text(weight = "bold"))) |>
+  tab_footnote(footnote = "%",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))  |>
+  tab_footnote(footnote = "CI = Confidence Interval",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))
 
 ```
 
@@ -191,21 +191,22 @@ gt::gt(tab, groupname_col = 'Sex') |>
 
 ```{r tab_1_2_3}
 
-tab <- svyby( ~ overweight, ~ agegr + sex, d1, svymean, vartype = c("ci"))
-tab[, c(4,6,8)] <- round(tab[, c(4,6,8)] * 100)
-tab <- tab[, c(1:2,4,6,8)]
+tab <-
+  svyby(~ overweight, ~ agegr + sex, d1, svymean, vartype = c("ci"))
+tab[, c(4, 6, 8)] <- round(tab[, c(4, 6, 8)] * 100)
+tab <- tab[, c(1:2, 4, 6, 8)]
 names(tab) <- c('Age', 'Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
-names(tab)[6] <- "Obesity (IC 95%)"
+names(tab)[6] <- "Obesity (95% CI)"
 rownames(tab) <- NULL
 tab <- tab[, c(1:2, 6)]
-gt::gt(tab, groupname_col = 'Sex') |> 
- gt::tab_style(
-     locations = cells_column_labels(columns = everything()),
-     style     = list(
-       cell_text(weight = "bold")
-     )
-   )
+gt::gt(tab, groupname_col = 'Sex') |>
+  gt::tab_style(locations = cells_column_labels(columns = everything()),
+                style     = list(cell_text(weight = "bold"))) |>
+  tab_footnote(footnote = "%",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))  |>
+  tab_footnote(footnote = "CI = Confidence Interval",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))
   
 ```
 
@@ -214,22 +215,22 @@ gt::gt(tab, groupname_col = 'Sex') |>
 
 ```{r tab_1_2_4}
 
-tab <- svyby( ~ overweight, ~ geo, d1, svymean, vartype = c("ci"))
-tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
-tab <- tab[, c(1,3,5,7)]
+tab <- svyby(~ overweight, ~ geo, d1, svymean, vartype = c("ci"))
+tab[, c(3, 5, 7)] <- round(tab[, c(3, 5, 7)] * 100)
+tab <- tab[, c(1, 3, 5, 7)]
 names(tab) <- c('Archipelago', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
-names(tab)[5] <- "Obesity (IC 95%)"
+names(tab)[5] <- "Obesity (95% CI)"
 rownames(tab) <- NULL
 tab <- tab[, c(1, 5)]
-gt::gt(tab) |> 
- gt::tab_style(
-     locations = cells_column_labels(columns = everything()),
-     style     = list(
-       cell_text(weight = "bold")
-     )
-   )
-  
+gt::gt(tab) |>
+  gt::tab_style(locations = cells_column_labels(columns = everything()),
+                style     = list(cell_text(weight = "bold"))) |>
+  tab_footnote(footnote = "%",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))  |>
+  tab_footnote(footnote = "CI = Confidence Interval",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))
+
 ```
 
 
@@ -247,10 +248,12 @@ gt::gt(tab) |>
 
 ```{r tab_1_3_1}
 
-tbl_svysummary(d1,
-               include = c(obese),
-               missing = 'no',
-               statistic = list(all_categorical() ~ "{p}")) |>
+tbl_svysummary(
+  d1,
+  include = c(obese),
+  missing = 'no',
+  statistic = list(all_categorical() ~ "{p}")
+) |>
   modify_header(label ~ "") |>
   add_ci(
     pattern = "{stat} ({ci})",
@@ -258,8 +261,8 @@ tbl_svysummary(d1,
   )  |>
   modify_header(stat_0 = "**Prevalence (95% CI)**") |>
   bold_labels() |>
-  remove_row_type(type='level', level_value = 'No') |>
-  remove_row_type(type='header')
+  remove_row_type(type = 'level', level_value = 'No') |>
+  remove_row_type(type = 'header')
 
 # as_gt(t1.1) |> gt::gtsave(filename = here("output/t1_1.rtf"))
 # as_gt(t1.1) |> gt::gtsave(filename = here("output/t1_1.docx"))
@@ -271,21 +274,21 @@ tbl_svysummary(d1,
 
 ```{r tab_1_3_2}
 
-tab <- svyby( ~ obese, ~ sex, d1, svymean, vartype = c("ci"))
-tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
-tab <- tab[, c(1,3,5,7)]
+tab <- svyby(~ obese, ~ sex, d1, svymean, vartype = c("ci"))
+tab[, c(3, 5, 7)] <- round(tab[, c(3, 5, 7)] * 100)
+tab <- tab[, c(1, 3, 5, 7)]
 names(tab) <- c('Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
-names(tab)[5] <- "Obesity (IC 95%)"
+names(tab)[5] <- "Obesity (95% CI)"
 rownames(tab) <- NULL
 tab <- tab[, c(1, 5)]
-gt::gt(tab, groupname_col = 'Sex') |> 
- gt::tab_style(
-     locations = cells_column_labels(columns = everything()),
-     style     = list(
-       cell_text(weight = "bold")
-     )
-   )
+gt::gt(tab, groupname_col = 'Sex') |>
+  gt::tab_style(locations = cells_column_labels(columns = everything()),
+                style     = list(cell_text(weight = "bold"))) |>
+  tab_footnote(footnote = "%",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))  |>
+  tab_footnote(footnote = "CI = Confidence Interval",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))
 
 ```
 
@@ -293,22 +296,22 @@ gt::gt(tab, groupname_col = 'Sex') |>
 
 ```{r tab_1_3_3}
 
-tab <- svyby( ~ obese, ~ agegr + sex, d1, svymean, vartype = c("ci"))
-tab[, c(4,6,8)] <- round(tab[, c(4,6,8)] * 100)
-tab <- tab[, c(1:2,4,6,8)]
+tab <- svyby(~ obese, ~ agegr + sex, d1, svymean, vartype = c("ci"))
+tab[, c(4, 6, 8)] <- round(tab[, c(4, 6, 8)] * 100)
+tab <- tab[, c(1:2, 4, 6, 8)]
 names(tab) <- c('Age', 'Sex', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
-names(tab)[6] <- "Obesity (IC 95%)"
+names(tab)[6] <- "Obesity (95% CI)"
 rownames(tab) <- NULL
 tab <- tab[, c(1:2, 6)]
-gt::gt(tab, groupname_col = 'Sex') |> 
- gt::tab_style(
-     locations = cells_column_labels(columns = everything()),
-     style     = list(
-       cell_text(weight = "bold")
-     )
-   )
-  
+gt::gt(tab, groupname_col = 'Sex') |>
+  gt::tab_style(locations = cells_column_labels(columns = everything()),
+                style     = list(cell_text(weight = "bold"))) |>
+  tab_footnote(footnote = "%",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))  |>
+  tab_footnote(footnote = "CI = Confidence Interval",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))
+
 ```
 
 
@@ -316,21 +319,21 @@ gt::gt(tab, groupname_col = 'Sex') |>
 
 ```{r tab_1_3_4}
 
-tab <- svyby( ~ obese, ~ geo, d1, svymean, vartype = c("ci"))
-tab[, c(3,5,7)] <- round(tab[, c(3,5,7)] * 100)
-tab <- tab[, c(1,3,5,7)]
+tab <- svyby(~ obese, ~ geo, d1, svymean, vartype = c("ci"))
+tab[, c(3, 5, 7)] <- round(tab[, c(3, 5, 7)] * 100)
+tab <- tab[, c(1, 3, 5, 7)]
 names(tab) <- c('Archipelago', 'Obesity', 'lo', 'hi')
 tab$out <- paste0(tab$Obesity, ' (', tab$lo, ' - ', tab$hi, ')')
-names(tab)[5] <- "Obesity (IC 95%)"
+names(tab)[5] <- "Obesity (95% CI)"
 rownames(tab) <- NULL
 tab <- tab[, c(1, 5)]
-gt::gt(tab) |> 
- gt::tab_style(
-     locations = cells_column_labels(columns = everything()),
-     style     = list(
-       cell_text(weight = "bold")
-     )
-   )
+gt::gt(tab) |>
+  gt::tab_style(locations = cells_column_labels(columns = everything()),
+                style     = list(cell_text(weight = "bold"))) |>
+  tab_footnote(footnote = "%",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))  |>
+  tab_footnote(footnote = "CI = Confidence Interval",
+               locations = cells_column_labels(columns = "Obesity (95% CI)"))
   
 ```
 
