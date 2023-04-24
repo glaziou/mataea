@@ -37,3 +37,9 @@ system.time(rmarkdown::render(
   output_file = 'lipid.html'
 ))
 
+# diabetes profile
+system.time(rmarkdown::render(
+  here('R/diabetes.Rmd'),
+  output_dir = here('html'),
+  output_file = 'diabetes.html'
+))

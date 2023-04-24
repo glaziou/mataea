@@ -1,0 +1,160 @@
+--- 
+title: "MATA'EA, French Polynesia"
+subtitle: "Diabetes"
+output:  
+  html_document: 
+    mode: selfcontained
+    toc: yes 
+    toc_float: true
+    number_sections: false
+    theme: flatly
+fig_width: 12 
+fig_caption: FALSE 
+--- 
+  
+```{r setup, include=FALSE} 
+# Chapter 1
+# Set options, load data, utility functions 
+knitr::opts_chunk$set(
+  echo = FALSE,
+  results = "asis",
+  message = FALSE,
+  warning = FALSE
+)
+library(data.table)
+library(here)
+library(haven)
+library(knitr)
+library(gtsummary)
+library(flextable)
+library(survey)
+library(gt)
+theme_gtsummary_language('en')
+theme_gtsummary_journal('lancet')
+
+load(here('data/rep.rdata'))
+
+```
+
+
+## 3.1 Glycosylated hemoglobin results
+
+### Table 3.1.1 Categories
+
+```{r tab_3_1_1}
+
+d3 <- survey::svydesign(
+  id = ~ subjid,
+  weights = ~ w.hbg,
+  strata = ~ geo + agegr,
+  data = mata[!is.na(chol), .(subjid,
+                              w.hbg,
+                              geo,
+                              agegr,
+                              sex,
+                              bmi,
+                              bm,
+                              bm2,
+                              overweight,
+                              obese,
+                              tg,
+                              chol,
+                              hdl,
+                              hdl.ratio,
+                              ldl,
+                              hdlldl.ratio,
+                              hbg)]
+)
+
+
+tbl_svysummary(d3,
+               include = c(hbg),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Glycosylated hemoglobin (95% CI)**") |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 3.1.2 Glycosylated hemoglobin by sex
+
+```{r tab_3_1_2}
+tbl_svysummary(d3,
+               include = c(hbg),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Glycosylated hemoglobin**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 3.1.3 Glycosylated hemoglobin by age
+
+```{r tab_3_1_3}
+
+tbl_svysummary(d3,
+               include = c(hbg),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Glycosylated hemoglobin**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 3.1.4 Glycosylated hemoglobin by archipelago
+
+```{r tab_3_1_4}
+
+tbl_svysummary(d3,
+               include = c(hbg),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Glycosylated hemoglobin**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 3.1.5 Glycosylated hemoglobin by body mass categories
+
+```{r tab_3_1_5}
+
+tbl_svysummary(d3,
+               include = c(hbg),
+               missing = 'no',
+               by = bm2,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Glycosylated hemoglobin**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```

@@ -109,6 +109,31 @@ mata[, w.lipid := w1 * w3]
 
 
 #-------------------------------------
+# Diabetes
+#-------------------------------------
+mata$hbg <- haven::as_factor(mata$res_hba1g_cat)
+mata[res_hba1g_cat==99, hbg := NA]
+mata$hbg <- droplevels(mata$tg)
+res <- c('Below normal','Normal','Above normal')
+levels(mata$hbg) <- res
+
+# update weights
+out <-
+  mata[, .(miss.hbg = sum(is.na(hbg))), by = .(geo, agegr, sex)]
+
+mata <-
+  merge(mata,
+        out[, .(geo, agegr, sex, miss.hbg)],
+        by = c('geo', 'agegr', 'sex'),
+        all.x = T)
+mata[, w4 := 1 / (1 - miss.hbg / N)]
+mata[, w.hbg := w1 * w4]
+
+
+
+
+
+#-------------------------------------
 # save binaries
 #-------------------------------------
 save(mata, file = here("data/rep.rdata"))
