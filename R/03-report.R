@@ -43,3 +43,10 @@ system.time(rmarkdown::render(
   output_dir = here('html'),
   output_file = 'diabetes.html'
 ))
+
+# seroprevalence of various arboviruses 
+system.time(rmarkdown::render(
+  here('R/arbo.Rmd'),
+  output_dir = here('html'),
+  output_file = 'arbo.html'
+))

@@ -20,6 +20,7 @@
 library(data.table)
 library(here)
 library(haven)
+library(readxl)
 
 load(here('data/mata.rdata'))
 
@@ -129,6 +130,34 @@ mata <-
 mata[, w4 := 1 / (1 - miss.hbg / N)]
 mata[, w.hbg := w1 * w4]
 
+
+
+
+#-------------------------------------
+# Arboviruses
+#-------------------------------------
+arbo <-
+  data.table(
+    read_excel(
+      'input/2023-03-23 Mataea serologies arbovirus brutes COMPLET.XLSX',
+      sheet = 1
+    )
+  )
+names(arbo) <- tolower(names(arbo))
+names(arbo) <- gsub("-","", names(arbo))
+mata <- merge(mata, arbo, by="subjid", all.x = T)
+
+# update weights (missing 1 arbo result = missing all arbo results)
+out <-
+  mata[, .(miss.arbo = sum(is.na(denv1))), by = .(geo, agegr, sex)]
+
+mata <-
+  merge(mata,
+        out[, .(geo, agegr, sex, miss.arbo)],
+        by = c('geo', 'agegr', 'sex'),
+        all.x = T)
+mata[, w5 := 1 / (1 - miss.arbo / N)]
+mata[, w.arbo := w1 * w5]
 
 
 

@@ -1,0 +1,671 @@
+--- 
+title: "MATA'EA, French Polynesia"
+subtitle: "Arboviruses"
+output:  
+  html_document: 
+    mode: selfcontained
+    toc: yes 
+    toc_float: true
+    number_sections: false
+    theme: flatly
+fig_width: 12 
+fig_caption: FALSE 
+--- 
+  
+```{r setup, include=FALSE} 
+# Chapter 1
+# Set options, load data, utility functions 
+knitr::opts_chunk$set(
+  echo = FALSE,
+  results = "asis",
+  message = FALSE,
+  warning = FALSE
+)
+library(data.table)
+library(here)
+library(haven)
+library(knitr)
+library(gtsummary)
+library(flextable)
+library(survey)
+library(gt)
+theme_gtsummary_language('en')
+theme_gtsummary_journal('lancet')
+
+load(here('data/rep.rdata'))
+
+```
+
+
+## 4.1 Dengue serotype 1 results
+
+### Table 4.1.1 Dengue 1 seroprevalence
+
+```{r tab_4_1_1}
+
+d4 <- survey::svydesign(
+  id = ~ subjid,
+  weights = ~ w.arbo,
+  strata = ~ geo + agegr,
+  data = mata[!is.na(denv1), .(subjid,
+                              w.arbo,
+                              geo,
+                              agegr,
+                              sex,
+                              bmi,
+                              bm,
+                              bm2,
+                              overweight,
+                              obese, 
+                              denv1, 
+                              denv2, 
+                              denv3, 
+                              denv4, 
+                              zikv, 
+                              chikv, 
+                              rrv)]
+)
+
+
+tbl_svysummary(d4,
+               include = c(denv1),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Dengue 1 (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.1.2 Dengue 1 seroprevalence by sex
+
+```{r tab_4_1_2}
+tbl_svysummary(d4,
+               include = c(denv1),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 1**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.1.3 Dengue 1 seroprevalence by age
+
+```{r tab_4_1_3}
+
+tbl_svysummary(d4,
+               include = c(denv1),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 1**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.1.4 Dengue 1 seroprevalence by archipelago
+
+```{r tab_4_1_4}
+
+tbl_svysummary(d4,
+               include = c(denv1),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 1**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+
+
+## 4.2 Dengue serotype 2 results
+
+### Table 4.2.1 Dengue 2 seroprevalence
+
+```{r tab_4_2_1}
+
+tbl_svysummary(d4,
+               include = c(denv2),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Dengue 2 (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.2.2 Dengue 2 seroprevalence by sex
+
+```{r tab_4_2_2}
+
+tbl_svysummary(d4,
+               include = c(denv2),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 2**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.2.3 Dengue 2 seroprevalence by age
+
+```{r tab_4_2_3}
+
+tbl_svysummary(d4,
+               include = c(denv2),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 2**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.2.4 Dengue 2 seroprevalence by archipelago
+
+```{r tab_4_2_4}
+
+tbl_svysummary(d4,
+               include = c(denv2),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 2**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+
+
+## 4.3 Dengue serotype 3 results
+
+### Table 4.3.1 Dengue 3 seroprevalence
+
+```{r tab_4_3_1}
+
+tbl_svysummary(d4,
+               include = c(denv3),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Dengue 3 (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.3.2 Dengue 3 seroprevalence by sex
+
+```{r tab_4_3_2}
+tbl_svysummary(d4,
+               include = c(denv3),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 3**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.3.3 Dengue 3 seroprevalence by age
+
+```{r tab_4_3_3}
+
+tbl_svysummary(d4,
+               include = c(denv3),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 3**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.3.4 Dengue 3 seroprevalence by archipelago
+
+```{r tab_4_3_4}
+
+tbl_svysummary(d4,
+               include = c(denv3),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 3**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+
+
+## 4.4 Dengue serotype 4 results
+
+### Table 4.4.1 Dengue 4 seroprevalence
+
+```{r tab_4_4_1}
+
+tbl_svysummary(d4,
+               include = c(denv4),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Dengue 4 (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.4.2 Dengue 4 seroprevalence by sex
+
+```{r tab_4_4_2}
+
+tbl_svysummary(d4,
+               include = c(denv4),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 4**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.4.3 Dengue 4 seroprevalence by age
+
+```{r tab_4_4_3}
+
+tbl_svysummary(d4,
+               include = c(denv4),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 4**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.4.4 Dengue 4 seroprevalence by archipelago
+
+```{r tab_4_4_4}
+
+tbl_svysummary(d4,
+               include = c(denv4),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Dengue 4**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+
+
+## 4.5 Zika results
+
+### Table 4.5.1 Zika seroprevalence
+
+```{r tab_4_5_1}
+
+tbl_svysummary(d4,
+               include = c(zikv),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Zika (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.5.2 Zika seroprevalence by sex
+
+```{r tab_4_5_2}
+tbl_svysummary(d4,
+               include = c(zikv),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Zika**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.5.3 Zika seroprevalence by age
+
+```{r tab_4_5_3}
+
+tbl_svysummary(d4,
+               include = c(zikv),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Zika**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.5.4 Zika seroprevalence by archipelago
+
+```{r tab_4_5_4}
+
+tbl_svysummary(d4,
+               include = c(zikv),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Zika**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+
+
+## 4.6 Chikungunya results
+
+### Table 4.6.1 Chikungunya seroprevalence
+
+```{r tab_4_6_1}
+
+tbl_svysummary(d4,
+               include = c(chikv),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Chikungunya (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.6.2 Chikungunya seroprevalence by sex
+
+```{r tab_4_6_2}
+tbl_svysummary(d4,
+               include = c(chikv),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Chikungunya**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.6.3 Chikungunya seroprevalence by age
+
+```{r tab_4_6_3}
+
+tbl_svysummary(d4,
+               include = c(chikv),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Chikungunya**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.6.4 Chikungunya seroprevalence by archipelago
+
+```{r tab_4_6_4}
+
+tbl_svysummary(d4,
+               include = c(chikv),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Chikungunya**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+
+## 4.7 Ross River results
+
+### Table 4.7.1 Ross River seroprevalence
+
+```{r tab_4_7_1}
+
+tbl_svysummary(d4,
+               include = c(rrv),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Ross River (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 4.7.2 Ross River seroprevalence by sex
+
+```{r tab_4_7_2}
+tbl_svysummary(d4,
+               include = c(rrv),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Ross River**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.7.3 Ross River seroprevalence by age
+
+```{r tab_4_7_3}
+
+tbl_svysummary(d4,
+               include = c(rrv),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Ross River**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 4.7.4 Ross River seroprevalence by archipelago
+
+```{r tab_4_7_4}
+
+tbl_svysummary(d4,
+               include = c(rrv),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Ross River**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
