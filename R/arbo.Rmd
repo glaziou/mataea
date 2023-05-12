@@ -669,3 +669,78 @@ tbl_svysummary(d4,
 
 
 
+## 4.8 Zika vs Dengue
+
+### Table 4.8.1 Zika prevalence vs dengue 1, archipelago, age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_4_8_1}
+
+mata[, zika := as.numeric(factor(zikv)) - 1]
+
+d4b <- survey::svydesign(
+  id = ~ subjid,
+  weights = ~ w.arbo,
+  strata = ~ geo + agegr,
+  data = mata[!is.na(denv1), .(subjid,
+                              w.arbo,
+                              geo,
+                              agegr,
+                              sex,
+                              bmi,
+                              bm,
+                              bm2,
+                              overweight,
+                              obese, 
+                              denv1, 
+                              denv2, 
+                              denv3, 
+                              denv4, 
+                              zikv,
+                              zika,
+                              chikv, 
+                              rrv)]
+)
+
+t1 <- tbl_uvregression(d4b,
+    method = svyglm,
+    label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group"),
+    include = c('geo', 'sex', 'agegr', 'denv1','denv2','denv3','denv4'),
+    hide_n = TRUE,
+    y = zika,
+    method.args = list(family = quasibinomial),
+    exponentiate = TRUE
+  ) |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+#  add_q() |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
+  add_significance_stars(hide_se = TRUE,
+                         hide_p = FALSE,
+                         pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    zika ~ geo + sex + agegr + denv1 + denv2 + denv3 + denv4,
+    design = d4b,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(m,
+               label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group"),
+               exponentiate = TRUE) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+#  add_global_p() |>
+  add_significance_stars(
+    hide_se = TRUE,
+    hide_p = FALSE,
+    pattern = "{p.value}{stars}"
+  )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+
+```
+
+
