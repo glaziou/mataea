@@ -147,6 +147,11 @@ names(arbo) <- tolower(names(arbo))
 names(arbo) <- gsub("-","", names(arbo))
 mata <- merge(mata, arbo, by="subjid", all.x = T)
 
+# household size
+mata[nhouse_people_tot != 77, hh := nhouse_people_tot] # total
+mata[nhouse_people != 77, hh.adult := nhouse_people]   # adult only
+
+
 # update weights (missing 1 arbo result = missing all arbo results)
 out <-
   mata[, .(miss.arbo = sum(is.na(denv1))), by = .(geo, agegr, sex)]
@@ -158,6 +163,36 @@ mata <-
         all.x = T)
 mata[, w5 := 1 / (1 - miss.arbo / N)]
 mata[, w.arbo := w1 * w5]
+
+
+
+
+#-------------------------------------
+# VHB
+#-------------------------------------
+mata[vhb_conclusion < 77, vhb := as_factor(vhb_conclusion)]
+mata$vhb <- droplevels(mata$vhb)
+levels(mata$vhb) <-
+  c(
+    'No prior contact with VHB',
+    'HBs carrier (ongoing infection)',
+    'Plausible vaccination',
+    'Plausible healed past infection',
+    'Plausible healed past infection with isolated anti-HBC antibodies'
+  )
+
+# update weights 
+out <-
+  mata[, .(miss.vhb = sum(is.na(vhb))), by = .(geo, agegr, sex)]
+
+mata <-
+  merge(mata,
+        out[, .(geo, agegr, sex, miss.vhb)],
+        by = c('geo', 'agegr', 'sex'),
+        all.x = T)
+mata[, w6 := 1 / (1 - miss.vhb / N)]
+mata[, w.vhb := w1 * w6]
+
 
 
 

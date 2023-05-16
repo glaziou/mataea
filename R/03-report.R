@@ -50,3 +50,11 @@ system.time(rmarkdown::render(
   output_dir = here('html'),
   output_file = 'arbo.html'
 ))
+
+# VHB 
+system.time(rmarkdown::render(
+  here('R/vhb.Rmd'),
+  output_dir = here('html'),
+  output_file = 'vhb.html'
+))
+

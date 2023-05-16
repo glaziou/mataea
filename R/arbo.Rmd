@@ -676,6 +676,10 @@ tbl_svysummary(d4,
 ```{r tab_4_8_1}
 
 mata[, zika := as.numeric(factor(zikv)) - 1]
+mata[, den1 := as.numeric(factor(denv1)) - 1]
+mata[, den2 := as.numeric(factor(denv2)) - 1]
+mata[, den3 := as.numeric(factor(denv3)) - 1]
+mata[, den4 := as.numeric(factor(denv4)) - 1]
 
 d4b <- survey::svydesign(
   id = ~ subjid,
@@ -694,17 +698,23 @@ d4b <- survey::svydesign(
                               denv1, 
                               denv2, 
                               denv3, 
-                              denv4, 
+                              denv4,
+                              den1,
+                              den2,
+                              den3,
+                              den4,
                               zikv,
                               zika,
-                              chikv, 
+                              chikv,
+                              hh,
+                              hh.adult,
                               rrv)]
 )
 
 t1 <- tbl_uvregression(d4b,
     method = svyglm,
-    label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group"),
-    include = c('geo', 'sex', 'agegr', 'denv1','denv2','denv3','denv4'),
+    label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+    include = c('geo', 'sex', 'agegr', 'hh','denv1','denv2','denv3','denv4'),
     hide_n = TRUE,
     y = zika,
     method.args = list(family = quasibinomial),
@@ -719,13 +729,13 @@ t1 <- tbl_uvregression(d4b,
 
 m <-
   svyglm(
-    zika ~ geo + sex + agegr + denv1 + denv2 + denv3 + denv4,
+    zika ~ geo + sex + agegr + hh + denv1 + denv2 + denv3 + denv4,
     design = d4b,
     family = "quasibinomial"
   )
 
 t2 <- tbl_regression(m,
-               label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group"),
+               label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
                exponentiate = TRUE) |>
   modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
   modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
@@ -743,4 +753,195 @@ tbl_merge(
 
 ```
 
+
+
+
+## 4.9 Risk factors for Dengue-positive serology
+
+### Table 4.9.1 Dengue 1 prevalence vs household size, archipelago, age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_4_9_1}
+
+t1 <- tbl_uvregression(d4b,
+    method = svyglm,
+    label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+    include = c('geo', 'sex', 'agegr', 'hh','denv2','denv3','denv4'),
+    hide_n = TRUE,
+    y = den1,
+    method.args = list(family = quasibinomial),
+    exponentiate = TRUE
+  ) |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+#  add_q() |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
+  add_significance_stars(hide_se = TRUE,
+                         hide_p = FALSE,
+                         pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    den1 ~ geo + sex + agegr + hh + denv2 + denv3 + denv4,
+    design = d4b,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(m,
+               label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+               exponentiate = TRUE) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+#  add_global_p() |>
+  add_significance_stars(
+    hide_se = TRUE,
+    hide_p = FALSE,
+    pattern = "{p.value}{stars}"
+  )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+
+```
+
+
+### Table 4.9.2 Dengue 2 prevalence vs household size, archipelago, age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_4_9_2}
+
+t1 <- tbl_uvregression(d4b,
+    method = svyglm,
+    label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+    include = c('geo', 'sex', 'agegr', 'hh','denv1','denv3','denv4'),
+    hide_n = TRUE,
+    y = den2,
+    method.args = list(family = quasibinomial),
+    exponentiate = TRUE
+  ) |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+#  add_q() |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
+  add_significance_stars(hide_se = TRUE,
+                         hide_p = FALSE,
+                         pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    den2 ~ geo + sex + agegr + hh + denv1 + denv3 + denv4,
+    design = d4b,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(m,
+               label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+               exponentiate = TRUE) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+#  add_global_p() |>
+  add_significance_stars(
+    hide_se = TRUE,
+    hide_p = FALSE,
+    pattern = "{p.value}{stars}"
+  )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+
+```
+
+
+### Table 4.9.3 Dengue 3 prevalence vs household size, archipelago, age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_4_9_3}
+
+t1 <- tbl_uvregression(d4b,
+    method = svyglm,
+    label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+    include = c('geo', 'sex', 'agegr', 'hh','denv1','denv2','denv4'),
+    hide_n = TRUE,
+    y = den3,
+    method.args = list(family = quasibinomial),
+    exponentiate = TRUE
+  ) |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+#  add_q() |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
+  add_significance_stars(hide_se = TRUE,
+                         hide_p = FALSE,
+                         pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    den3 ~ geo + sex + agegr + hh + denv1 + denv2 + denv4,
+    design = d4b,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(m,
+               label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+               exponentiate = TRUE) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+#  add_global_p() |>
+  add_significance_stars(
+    hide_se = TRUE,
+    hide_p = FALSE,
+    pattern = "{p.value}{stars}"
+  )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+
+```
+
+
+### Table 4.9.4 Dengue 4 prevalence vs household size, archipelago, age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_4_9_4}
+
+t1 <- tbl_uvregression(d4b,
+    method = svyglm,
+    label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+    include = c('geo', 'sex', 'agegr', 'hh','denv1','denv2','denv3'),
+    hide_n = TRUE,
+    y = den4,
+    method.args = list(family = quasibinomial),
+    exponentiate = TRUE
+  ) |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+#  add_q() |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
+  add_significance_stars(hide_se = TRUE,
+                         hide_p = FALSE,
+                         pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    den4 ~ geo + sex + agegr + hh + denv1 + denv2 + denv3,
+    design = d4b,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(m,
+               label = list(geo ~ "Archipelago", sex ~ "Sex", agegr ~ "Age group", hh ~ "Household size"),
+               exponentiate = TRUE) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+#  add_global_p() |>
+  add_significance_stars(
+    hide_se = TRUE,
+    hide_p = FALSE,
+    pattern = "{p.value}{stars}"
+  )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+
+```
 

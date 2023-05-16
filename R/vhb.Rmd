@@ -1,0 +1,85 @@
+--- 
+title: "MATA'EA, French Polynesia"
+subtitle: "VHB"
+output:  
+  html_document: 
+    mode: selfcontained
+    toc: yes 
+    toc_float: true
+    number_sections: false
+    theme: flatly
+fig_width: 12 
+fig_caption: FALSE 
+--- 
+  
+```{r setup, include=FALSE} 
+# Chapter 1
+# Set options, load data, utility functions 
+knitr::opts_chunk$set(
+  echo = FALSE,
+  results = "asis",
+  message = FALSE,
+  warning = FALSE
+)
+library(data.table)
+library(here)
+library(haven)
+library(knitr)
+library(gtsummary)
+library(flextable)
+library(survey)
+library(gt)
+theme_gtsummary_language('en')
+theme_gtsummary_journal('lancet')
+
+load(here('data/rep.rdata'))
+
+```
+
+
+## 5.1 VHB results
+
+### Table 5.1.1 VHB seroprevalence
+
+```{r tab_5_1_1}
+
+d5 <- survey::svydesign(
+  id = ~ subjid,
+  weights = ~ w.vhb,
+  strata = ~ geo + agegr,
+  data = mata[!is.na(denv1), .(subjid,
+                               w.vhb,
+                               geo,
+                               agegr,
+                               sex,
+                               bmi,
+                               bm,
+                               bm2,
+                               overweight,
+                               obese, 
+                               denv1, 
+                               denv2, 
+                               denv3, 
+                               denv4, 
+                               zikv, 
+                               chikv, 
+                               rrv,
+                               vhb)]
+)
+
+
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**VHB profile (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
