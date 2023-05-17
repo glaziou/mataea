@@ -180,6 +180,9 @@ levels(mata$vhb) <-
     'Plausible healed past infection',
     'Plausible healed past infection with isolated anti-HBC antibodies'
   )
+mata[!is.na(vhb), vhb.HBs := 0]
+mata[vhb == "HBs carrier (ongoing infection)", vhb.HBs := 1]
+
 
 # update weights 
 out <-

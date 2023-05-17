@@ -47,11 +47,13 @@ d5 <- survey::svydesign(
   id = ~ subjid,
   weights = ~ w.vhb,
   strata = ~ geo + agegr,
-  data = mata[!is.na(denv1), .(subjid,
+  data = mata[!is.na(vhb), .(subjid,
                                w.vhb,
                                geo,
                                agegr,
+                               age,
                                sex,
+                               hh,
                                bmi,
                                bm,
                                bm2,
@@ -64,7 +66,8 @@ d5 <- survey::svydesign(
                                zikv, 
                                chikv, 
                                rrv,
-                               vhb)]
+                               vhb,
+                               vhb.HBs)]
 )
 
 
@@ -79,7 +82,114 @@ tbl_svysummary(d5,
   )  |>
   modify_header(stat_0 = "**VHB profile (95% CI)**") |>
   bold_labels() |>  
-  remove_row_type(type = 'level', level_value = 'Negative') |>
   remove_row_type(type='header')
 
 ```
+
+
+
+### Table 5.1.2 VHB sero profiles by sex
+
+```{r tab_5_1_2}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.1.3 VHB sero profiles by age group
+
+```{r tab_5_1_3}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.1.4 VHB sero profiles by archipelago
+
+```{r tab_5_1_4}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+## 5.2 VHB risk factors
+
+### Table 5.2.1 HBS carrier vs household size, archipelago, age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_5_2_1}
+
+t1 <- tbl_uvregression(d5,
+    method = svyglm,
+    label = list(geo ~ "Archipelago", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
+    include = c('geo', 'sex', 'age', 'hh'),
+    hide_n = TRUE,
+    y = vhb.HBs,
+    method.args = list(family = quasibinomial),
+    exponentiate = TRUE
+  ) |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+#  add_q() |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
+  add_significance_stars(hide_se = TRUE,
+                         hide_p = FALSE,
+                         pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    vhb.HBs ~ geo + sex + age + hh,
+    design = d5,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(m,
+               label = list(geo ~ "Archipelago", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
+               exponentiate = TRUE) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+#  add_global_p() |>
+  add_significance_stars(
+    hide_se = TRUE,
+    hide_p = FALSE,
+    pattern = "{p.value}{stars}"
+  )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+
+```
+
