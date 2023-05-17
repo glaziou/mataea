@@ -50,6 +50,7 @@ d5 <- survey::svydesign(
   data = mata[!is.na(vhb), .(subjid,
                                w.vhb,
                                geo,
+                               marquises,
                                agegr,
                                age,
                                sex,
@@ -193,3 +194,48 @@ tbl_merge(
 
 ```
 
+### Table 5.2.2 HBS carrier vs household size, residence in Marquisas Is., age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_5_2_2}
+
+t1 <- tbl_uvregression(d5,
+    method = svyglm,
+    label = list(marquises ~ "Marquises", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
+    include = c('marquises', 'sex', 'age', 'hh'),
+    hide_n = TRUE,
+    y = vhb.HBs,
+    method.args = list(family = quasibinomial),
+    exponentiate = TRUE
+  ) |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+#  add_q() |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
+  add_significance_stars(hide_se = TRUE,
+                         hide_p = FALSE,
+                         pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    vhb.HBs ~ marquises + sex + age + hh,
+    design = d5,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(m,
+               label = list(marquises ~ "Marquises", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
+               exponentiate = TRUE) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+#  add_global_p() |>
+  add_significance_stars(
+    hide_se = TRUE,
+    hide_p = FALSE,
+    pattern = "{p.value}{stars}"
+  )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+
+```
