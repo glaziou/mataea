@@ -39,7 +39,8 @@ mata[is.na(bmi), bm := NA]
 mata[is.na(bmi), obese := NA]
 mata[is.na(bmi), overweight := NA]
 mata$bm <- droplevels(mata$bm)
-mata$bm2 <- forcats::fct_explicit_na(mata$bm, na_level = "(Missing)")
+mata$bm2 <-
+  forcats::fct_explicit_na(mata$bm, na_level = "(Missing)")
 mata$obese <- droplevels(mata$obese)
 mata$overweight <- droplevels(mata$overweight)
 
@@ -63,33 +64,33 @@ mata <-
 # Lipid profile
 #-------------------------------------
 mata$tg <- haven::as_factor(mata$res_tg_cat)
-mata[res_tg_cat==99, tg := NA]
+mata[res_tg_cat == 99, tg := NA]
 mata$tg <- droplevels(mata$tg)
-res <- c('Below normal','Normal','Above normal')
+res <- c('Below normal', 'Normal', 'Above normal')
 levels(mata$tg) <- res
 
 mata$chol <- haven::as_factor(mata$res_ct_cat)
-mata[res_ct_cat==99, chol := NA]
+mata[res_ct_cat == 99, chol := NA]
 mata$chol <- droplevels(mata$chol)
 levels(mata$chol) <- res
 
 mata$hdl <- haven::as_factor(mata$res_hdl_hdl_cat)
-mata[res_hdl_hdl_cat==99, hdl := NA]
+mata[res_hdl_hdl_cat == 99, hdl := NA]
 mata$hdl <- droplevels(mata$hdl)
 levels(mata$hdl) <- res
 
 mata$hdl.ratio <- haven::as_factor(mata$res_hdl_rcthd_cat)
-mata[res_hdl_rcthd_cat==99, hdl.ratio := NA]
+mata[res_hdl_rcthd_cat == 99, hdl.ratio := NA]
 mata$hdl.ratio <- droplevels(mata$hdl.ratio)
-levels(mata$hdl.ratio) <- c('Normal','Above normal')
+levels(mata$hdl.ratio) <- c('Normal', 'Above normal')
 
 mata$ldl <- haven::as_factor(mata$res_ldlc_ldlc_cat)
-mata[res_ldlc_ldlc_cat==99, ldl := NA]
+mata[res_ldlc_ldlc_cat == 99, ldl := NA]
 mata$ldl <- droplevels(mata$ldl)
 levels(mata$ldl) <- res
 
 mata$hdlldl.ratio <- haven::as_factor(mata$res_ldlc_rhdld_cat)
-mata[res_ldlc_rhdld_cat==99, hdlldl.ratio := NA]
+mata[res_ldlc_rhdld_cat == 99, hdlldl.ratio := NA]
 mata$hdlldl.ratio <- droplevels(mata$hdlldl.ratio)
 levels(mata$hdlldl.ratio) <- res
 
@@ -113,9 +114,9 @@ mata[, w.lipid := w1 * w3]
 # Diabetes
 #-------------------------------------
 mata$hbg <- haven::as_factor(mata$res_hba1g_cat)
-mata[res_hba1g_cat==99, hbg := NA]
+mata[res_hba1g_cat == 99, hbg := NA]
 mata$hbg <- droplevels(mata$tg)
-res <- c('Below normal','Normal','Above normal')
+res <- c('Below normal', 'Normal', 'Above normal')
 levels(mata$hbg) <- res
 
 # update weights
@@ -144,8 +145,8 @@ arbo <-
     )
   )
 names(arbo) <- tolower(names(arbo))
-names(arbo) <- gsub("-","", names(arbo))
-mata <- merge(mata, arbo, by="subjid", all.x = T)
+names(arbo) <- gsub("-", "", names(arbo))
+mata <- merge(mata, arbo, by = "subjid", all.x = T)
 
 # household size
 mata[nhouse_people_tot != 77, hh := nhouse_people_tot] # total
@@ -175,19 +176,56 @@ mata$vhb <- droplevels(mata$vhb)
 levels(mata$vhb) <-
   c(
     'No prior contact with VHB',
-    'HBs carrier (ongoing infection)',
-    'Plausible vaccination',
-    'Plausible healed past infection',
-    'Plausible healed past infection with isolated anti-HBC antibodies'
+    'HBs carrier',
+    'Vaccination',
+    'Healed infection',
+    'Healed infection'
   )
 mata[!is.na(vhb), vhb.HBs := 0]
-mata[vhb == "HBs carrier (ongoing infection)", vhb.HBs := 1]
+mata[vhb %in% c("HBs carrier"), vhb.HBs := 1]
+mata[, vhb.HBs := factor(vhb.HBs,
+                         levels = 0:1,
+                         labels = c("Negative", "Positive"))]
+
+mata[!is.na(vhb), vhb.alltime := 0]
+mata[vhb %in% c("HBs carrier","Healed infection"), vhb.alltime := 1]
+mata[, vhb.alltime := factor(vhb.alltime,
+                         levels = 0:1,
+                         labels = c("Negative", "Positive"))]
 
 mata[!is.na(geo), marquises := 0]
 mata[geo == "Marquises", marquises := 1]
 
+mata[!is.na(geo), australes := 0]
+mata[geo == "Australes", australes := 1]
 
-# update weights 
+
+# date of birth
+dob <- data.table(read_excel('input/naissance_HBV.xlsx',
+                             sheet = 1))
+mata <-
+  merge(mata, dob[, .(subjid, birth_cat_june_1995)], by = "subjid", all.x = TRUE)
+
+mata[!is.na(birth_cat_june_1995), date.vx := 0]
+mata[birth_cat_june_1995 == c("Né après le 08/06/1995"), date.vx := 1]
+mata[, date.vx := factor(date.vx,
+                         levels = 0:1,
+                         labels = c("Born before 08/06/1995", "Born after 08/06/1995"))]
+
+mata[, ethnicity := as_factor(socio_cultural2)]
+mata[ethnicity %in% c("Dont know","dont want to answer","Missing data"), ethnicity := NA]
+mata$ethnicity <- droplevels(mata$ethnicity)
+
+mata[, edu := as_factor(max_school2)]
+mata[edu %in% c("Missing data"), edu := NA]
+mata$edu <- droplevels(mata$edu)
+
+mata[, civil := as_factor(civil_state4)]
+mata[civil %in% c("Missing data"), civil := NA]
+mata$civil <- droplevels(mata$civil)
+
+
+# update weights
 out <-
   mata[, .(miss.vhb = sum(is.na(vhb))), by = .(geo, agegr, sex)]
 
@@ -207,4 +245,5 @@ mata[, w.vhb := w1 * w6]
 # save binaries
 #-------------------------------------
 save(mata, file = here("data/rep.rdata"))
+
 

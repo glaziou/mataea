@@ -37,9 +37,9 @@ load(here('data/rep.rdata'))
 ```
 
 
-## 5.1 VHB results
+## 5.1 VHB serological profiles
 
-### Table 5.1.1 VHB seroprevalence
+### Table 5.1.1 VHB profiles in French Polynesia
 
 ```{r tab_5_1_1}
 
@@ -47,28 +47,36 @@ d5 <- survey::svydesign(
   id = ~ subjid,
   weights = ~ w.vhb,
   strata = ~ geo + agegr,
-  data = mata[!is.na(vhb), .(subjid,
-                               w.vhb,
-                               geo,
-                               marquises,
-                               agegr,
-                               age,
-                               sex,
-                               hh,
-                               bmi,
-                               bm,
-                               bm2,
-                               overweight,
-                               obese, 
-                               denv1, 
-                               denv2, 
-                               denv3, 
-                               denv4, 
-                               zikv, 
-                               chikv, 
-                               rrv,
-                               vhb,
-                               vhb.HBs)]
+  data = mata[!is.na(vhb), .(
+    subjid,
+    w.vhb,
+    geo,
+    marquises,
+    australes,
+    agegr,
+    age,
+    date.vx,
+    sex,
+    edu,
+    civil,
+    ethnicity,
+    hh,
+    bmi,
+    bm,
+    bm2,
+    overweight,
+    obese,
+    denv1,
+    denv2,
+    denv3,
+    denv4,
+    zikv,
+    chikv,
+    rrv,
+    vhb,
+    vhb.HBs,
+    vhb.alltime
+  )]
 )
 
 
@@ -146,96 +154,222 @@ tbl_svysummary(d5,
 ```
 
 
-## 5.2 VHB risk factors
+## 5.2 All-time VHB infections
 
-### Table 5.2.1 HBS carrier vs household size, archipelago, age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+### Table 5.2.1 All-time VHB infections in French Polynesia
 
 ```{r tab_5_2_1}
 
-t1 <- tbl_uvregression(d5,
-    method = svyglm,
-    label = list(geo ~ "Archipelago", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
-    include = c('geo', 'sex', 'age', 'hh'),
-    hide_n = TRUE,
-    y = vhb.HBs,
-    method.args = list(family = quasibinomial),
-    exponentiate = TRUE
-  ) |>
-  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
-#  add_q() |>
-  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
-  add_significance_stars(hide_se = TRUE,
-                         hide_p = FALSE,
-                         pattern = "{p.value}{stars}")
-
-m <-
-  svyglm(
-    vhb.HBs ~ geo + sex + age + hh,
-    design = d5,
-    family = "quasibinomial"
-  )
-
-t2 <- tbl_regression(m,
-               label = list(geo ~ "Archipelago", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
-               exponentiate = TRUE) |>
-  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
-  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
-#  add_global_p() |>
-  add_significance_stars(
-    hide_se = TRUE,
-    hide_p = FALSE,
-    pattern = "{p.value}{stars}"
-  )
-# modify_footnote(everything() ~ NA, abbreviation = TRUE)
-
-tbl_merge(
-  tbls        = list(t1, t2),
-  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+tbl_svysummary(d5,
+               include = (vhb.alltime),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**All-time VHB infection (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
 
 ```
 
-### Table 5.2.2 HBS carrier vs household size, residence in Marquisas Is., age and sex, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+### Table 5.2.2 All-time VHB infections by sex
 
 ```{r tab_5_2_2}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = sex,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**All-time VHB infection**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
 
-t1 <- tbl_uvregression(d5,
-    method = svyglm,
-    label = list(marquises ~ "Marquises", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
-    include = c('marquises', 'sex', 'age', 'hh'),
-    hide_n = TRUE,
-    y = vhb.HBs,
-    method.args = list(family = quasibinomial),
-    exponentiate = TRUE
-  ) |>
+```
+
+
+### Table 5.2.3 All-time VHB infections by age group
+
+```{r tab_5_2_3}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = agegr,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**All-time VHB infection**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.2.4 All-time VHB infections by archipelago
+
+```{r tab_5_2_4}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**All-time VHB infection**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
+## 5.3 Analysis of risk factors 
+
+### Table 5.3.1 HBS carrier, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_5_3_1}
+
+t1 <- tbl_uvregression(
+  d5,
+  method = svyglm,
+  label = list(
+    geo ~ "Archipelago",
+    sex ~ "Sex",
+    age ~ "Age",
+    hh ~ "Household size",
+    edu ~ "Education",
+    ethnicity ~ "Ethnic group",
+    civil ~ "Civil status"
+  ),
+  include = c('geo', 'sex', 'age', 'ethnicity', 'edu', 'civil', 'hh'),
+  hide_n = TRUE,
+  y = vhb.HBs,
+  method.args = list(family = quasibinomial),
+  exponentiate = TRUE
+) |>
+  add_global_p() |>
   modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
-#  add_q() |>
-  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE) |>
-  add_significance_stars(hide_se = TRUE,
-                         hide_p = FALSE,
-                         pattern = "{p.value}{stars}")
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE)
+# add_significance_stars(hide_se = TRUE,
+#                        hide_p = FALSE,
+#                        pattern = "{p.value}{stars}")
 
 m <-
   svyglm(
-    vhb.HBs ~ marquises + sex + age + hh,
+    vhb.HBs ~ geo + sex + age + ethnicity + edu + civil + hh,
     design = d5,
     family = "quasibinomial"
   )
 
-t2 <- tbl_regression(m,
-               label = list(marquises ~ "Marquises", sex ~ "Sex", age ~ "Age", hh ~ "Household size"),
-               exponentiate = TRUE) |>
+t2 <- tbl_regression(
+  m,
+  label = list(
+    geo ~ "Archipelago",
+    sex ~ "Sex",
+    age ~ "Age",
+    hh ~ "Household size",
+    edu ~ "Education",
+    ethnicity ~ "Ethnic group",
+    civil ~ "Civil status"
+  ),
+  exponentiate = TRUE
+) |>
   modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
   modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
-#  add_global_p() |>
-  add_significance_stars(
-    hide_se = TRUE,
-    hide_p = FALSE,
-    pattern = "{p.value}{stars}"
-  )
+  add_global_p()
+# add_significance_stars(
+#   hide_se = TRUE,
+#   hide_p = FALSE,
+#   pattern = "{p.value}{stars}"
+# )
 # modify_footnote(everything() ~ NA, abbreviation = TRUE)
 
 tbl_merge(
   tbls        = list(t1, t2),
-  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**"))
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**")
+)
+
+```
+
+### Table 5.3.2 All-time infection, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_5_3_2}
+t1 <- tbl_uvregression(
+  d5,
+  method = svyglm,
+  label = list(
+    geo ~ "Archipelago",
+    sex ~ "Sex",
+    date.vx ~ "Born before vaccination policy",
+    age ~ "Age",
+    hh ~ "Household size",
+    edu ~ "Education",
+    ethnicity ~ "Ethnic group",
+    civil ~ "Civil status"
+  ),
+  include = c('geo', 'sex', 'date.vx', 'age', 'ethnicity', 'edu', 'civil', 'hh'),
+  hide_n = TRUE,
+  y = vhb.alltime,
+  method.args = list(family = quasibinomial),
+  exponentiate = TRUE
+) |>
+  add_global_p() |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE)
+# add_significance_stars(hide_se = TRUE,
+#                        hide_p = FALSE,
+#                        pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    vhb.alltime ~ geo + sex + date.vx + age + ethnicity + edu + civil + hh,
+    design = d5,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(
+  m,
+  label = list(
+    geo ~ "Archipelago",
+    sex ~ "Sex",
+    date.vx ~ "Born before vaccination policy",
+    age ~ "Age",
+    hh ~ "Household size",
+    edu ~ "Education",
+    ethnicity ~ "Ethnic group",
+    civil ~ "Civil status"
+  ),
+  exponentiate = TRUE
+) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+  add_global_p()
+# add_significance_stars(
+#   hide_se = TRUE,
+#   hide_p = FALSE,
+#   pattern = "{p.value}{stars}"
+# )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**")
+)
+
 
 ```
