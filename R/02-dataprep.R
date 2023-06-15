@@ -151,6 +151,9 @@ mata <- merge(mata, arbo, by = "subjid", all.x = T)
 # household size
 mata[nhouse_people_tot != 77, hh := nhouse_people_tot] # total
 mata[nhouse_people != 77, hh.adult := nhouse_people]   # adult only
+mata[nhouse_tot_classif2<99, hhc := as_factor(nhouse_tot_classif2)]
+mata$hhc <- droplevels(mata$hhc)
+levels(mata$hhc) <- c('1-2','3-4','5 or more')
 
 
 # update weights (missing 1 arbo result = missing all arbo results)
@@ -214,6 +217,8 @@ mata[, date.vx := factor(date.vx,
 
 mata[, ethnicity := as_factor(socio_cultural2)]
 mata[ethnicity %in% c("Dont know","dont want to answer","Missing data"), ethnicity := NA]
+mata[ethnicity == "Demi", ethnicity := "Mixed"]
+mata[ethnicity == "Popaa", ethnicity := "Caucasian"]
 mata$ethnicity <- droplevels(mata$ethnicity)
 
 mata[, edu := as_factor(max_school2)]

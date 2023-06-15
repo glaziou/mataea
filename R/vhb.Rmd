@@ -50,17 +50,18 @@ d5 <- survey::svydesign(
   data = mata[!is.na(vhb), .(
     subjid,
     w.vhb,
-    geo,
+    geo=relevel(factor(geo), ref="Société (Îles-du-vent)"),
     marquises,
     australes,
     agegr,
     age,
     date.vx,
-    sex,
+    sex=relevel(factor(sex), ref="Female"),
     edu,
     civil,
-    ethnicity,
+    ethnicity=relevel(factor(ethnicity), ref="Caucasian"),
     hh,
+    hhc,
     bmi,
     bm,
     bm2,
@@ -142,6 +143,80 @@ tbl_svysummary(d5,
                include = c(vhb),
                missing = 'no',
                by = geo,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.1.5 VHB sero profiles by Education level
+
+```{r tab_5_1_5}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = edu,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.1.6 VHB sero profiles by ethnicity
+
+```{r tab_5_1_6}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = ethnicity,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 5.1.7 VHB sero profiles by civil status
+
+```{r tab_5_1_7}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = civil,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+### Table 5.1.8 VHB sero profiles by house size category
+
+```{r tab_5_1_8}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = hhc,
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "**VHB**") |>
   add_ci(
@@ -237,6 +312,86 @@ tbl_svysummary(d5,
 
 
 
+### Table 5.2.5 All-time VHB sero profiles by Education level
+
+```{r tab_5_2_5}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = edu,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.2.6 All-time VHB sero profiles by ethnicity
+
+```{r tab_5_2_6}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = ethnicity,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 5.2.7 All-time VHB sero profiles by civil status
+
+```{r tab_5_2_7}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = civil,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 5.2.8 All-time VHB sero profiles by house size category
+
+```{r tab_5_2_8}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = hhc,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+
+
 
 ## 5.3 Analysis of risk factors 
 
@@ -251,12 +406,10 @@ t1 <- tbl_uvregression(
     geo ~ "Archipelago",
     sex ~ "Sex",
     age ~ "Age",
-    hh ~ "Household size",
     edu ~ "Education",
-    ethnicity ~ "Ethnic group",
     civil ~ "Civil status"
   ),
-  include = c('geo', 'sex', 'age', 'ethnicity', 'edu', 'civil', 'hh'),
+  include = c('geo', 'sex', 'age', 'edu', 'civil'),
   hide_n = TRUE,
   y = vhb.HBs,
   method.args = list(family = quasibinomial),
@@ -271,7 +424,7 @@ t1 <- tbl_uvregression(
 
 m <-
   svyglm(
-    vhb.HBs ~ geo + sex + age + ethnicity + edu + civil + hh,
+    vhb.HBs ~ geo + sex + age + edu + civil,
     design = d5,
     family = "quasibinomial"
   )
@@ -282,9 +435,7 @@ t2 <- tbl_regression(
     geo ~ "Archipelago",
     sex ~ "Sex",
     age ~ "Age",
-    hh ~ "Household size",
     edu ~ "Education",
-    ethnicity ~ "Ethnic group",
     civil ~ "Civil status"
   ),
   exponentiate = TRUE
@@ -306,6 +457,7 @@ tbl_merge(
 
 ```
 
+
 ### Table 5.3.2 All-time infection, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
 
 ```{r tab_5_3_2}
@@ -317,12 +469,11 @@ t1 <- tbl_uvregression(
     sex ~ "Sex",
     date.vx ~ "Born before vaccination policy",
     age ~ "Age",
-    hh ~ "Household size",
     edu ~ "Education",
     ethnicity ~ "Ethnic group",
     civil ~ "Civil status"
   ),
-  include = c('geo', 'sex', 'date.vx', 'age', 'ethnicity', 'edu', 'civil', 'hh'),
+  include = c('geo', 'sex', 'date.vx', 'age', 'ethnicity', 'edu', 'civil'),
   hide_n = TRUE,
   y = vhb.alltime,
   method.args = list(family = quasibinomial),
@@ -337,7 +488,7 @@ t1 <- tbl_uvregression(
 
 m <-
   svyglm(
-    vhb.alltime ~ geo + sex + date.vx + age + ethnicity + edu + civil + hh,
+    vhb.alltime ~ geo + sex + date.vx + age + ethnicity + edu + civil,
     design = d5,
     family = "quasibinomial"
   )
@@ -349,7 +500,6 @@ t2 <- tbl_regression(
     sex ~ "Sex",
     date.vx ~ "Born before vaccination policy",
     age ~ "Age",
-    hh ~ "Household size",
     edu ~ "Education",
     ethnicity ~ "Ethnic group",
     civil ~ "Civil status"
