@@ -76,7 +76,10 @@ d5 <- survey::svydesign(
     rrv,
     vhb,
     vhb.HBs,
-    vhb.alltime
+    vhb.alltime,
+    fib4,
+    diabetes,
+    hyperchol
   )]
 )
 
@@ -523,3 +526,109 @@ tbl_merge(
 
 
 ```
+
+
+
+
+## 5.4 Fib-4 categories
+
+### Table 5.4.1 Distribution of Fib-4 categories in French Polynesia
+
+```{r tab_5_4_1}
+
+tbl_svysummary(d5,
+               include = (fib4),
+               missing='no',
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  modify_header(stat_0 = "**Fib-4 categories (95% CI)**") |>
+  bold_labels() |>  
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 5.4.2 Fib-4 categories by all-time HbS
+
+```{r tab_5_4_2}
+tbl_svysummary(d5,
+               include = c(fib4),
+               missing = 'no',
+               by = vhb.alltime,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Fib-4 categories**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.4.3 Fib-4 categories by diabetes status
+
+```{r tab_5_4_3}
+tbl_svysummary(d5,
+               include = c(fib4),
+               missing = 'no',
+               by = diabetes,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Fib-4 categories**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.4.4 Fib-4 categories by obesity status
+
+```{r tab_5_4_4}
+tbl_svysummary(d5,
+               include = c(fib4),
+               missing = 'no',
+               by = obese,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Fib-4 categories**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+### Table 5.4.5 Fib-4 categories by hypercholesterolemia status
+
+```{r tab_5_4_5}
+tbl_svysummary(d5,
+               include = c(fib4),
+               missing = 'no',
+               by = hyperchol,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**Fib-4 categories**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type='header')
+
+```
+
+
+

@@ -229,6 +229,14 @@ mata[, civil := as_factor(civil_state4)]
 mata[civil %in% c("Missing data"), civil := NA]
 mata$civil <- droplevels(mata$civil)
 
+mata[fib_4_cat2 != 99, fib4 := droplevels(as_factor(fib_4_cat2))]
+levels(mata$fib4) <- c("Cat 1", "Cat 2", "Cat 3")
+
+mata[diabete != 99, diabetes := droplevels(as_factor(diabete))]
+levels(mata$diabetes) <- c("Non diabetic", "Pre-diabetes", "Type-2 diabetes")
+
+mata[hypercholesterolemia_bool != 99, hyperchol := droplevels(as_factor(hypercholesterolemia_bool))]
+
 
 # update weights
 out <-
