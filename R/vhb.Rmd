@@ -57,9 +57,10 @@ d5 <- survey::svydesign(
     age,
     date.vx,
     sex=relevel(factor(sex), ref="Female"),
-    edu,
+    edu=relevel(edu, ref="University or after"),
     civil,
     ethnicity=relevel(factor(ethnicity), ref="Caucasian"),
+    birthplace=relevel(birthplace, ref="Outside French Polynesia"),
     hh,
     hhc,
     bmi,
@@ -232,6 +233,44 @@ tbl_svysummary(d5,
 ```
 
 
+### Table 5.1.9 VHB sero profiles by place of birth
+
+```{r tab_5_1_9}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = birthplace,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.1.10 VHB sero profile according to birth before or after the introduction of a vaccination policy
+
+```{r tab_5_1_10}
+tbl_svysummary(d5,
+               include = c(vhb),
+               missing = 'no',
+               by = date.vx,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
 ## 5.2 All-time VHB infections
 
 ### Table 5.2.1 All-time VHB infections in French Polynesia
@@ -392,7 +431,42 @@ tbl_svysummary(d5,
 
 ```
 
+### Table 5.2.9 All-time VHB sero profiles by place of birth
 
+```{r tab_5_2_9}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = birthplace,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
+
+
+### Table 5.2.10 All-time VHB sero profile according to birth before or after the introduction of a vaccination policy
+
+```{r tab_5_2_10}
+tbl_svysummary(d5,
+               include = c(vhb.alltime),
+               missing = 'no',
+               by = date.vx,
+               statistic = list(all_categorical() ~ "{p}")) |>
+  modify_header(label ~ "**VHB**") |>
+  add_ci(
+    pattern = "{stat} ({ci})",
+    statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
+  )  |>
+  bold_labels() |>
+  remove_row_type(type='header')
+
+```
 
 
 
@@ -409,8 +483,7 @@ t1 <- tbl_uvregression(
     geo ~ "Archipelago",
     sex ~ "Sex",
     age ~ "Age",
-    edu ~ "Education",
-    civil ~ "Civil status"
+    edu ~ "Education"
   ),
   include = c('geo', 'sex', 'age', 'edu', 'civil'),
   hide_n = TRUE,
@@ -438,8 +511,7 @@ t2 <- tbl_regression(
     geo ~ "Archipelago",
     sex ~ "Sex",
     age ~ "Age",
-    edu ~ "Education",
-    civil ~ "Civil status"
+    edu ~ "Education"
   ),
   exponentiate = TRUE
 ) |>
@@ -473,10 +545,9 @@ t1 <- tbl_uvregression(
     date.vx ~ "Born before vaccination policy",
     age ~ "Age",
     edu ~ "Education",
-    ethnicity ~ "Ethnic group",
-    civil ~ "Civil status"
+    birthplace ~ "Place of birth"
   ),
-  include = c('geo', 'sex', 'date.vx', 'age', 'ethnicity', 'edu', 'civil'),
+  include = c('geo', 'sex', 'date.vx', 'age', 'edu','birthplace'),
   hide_n = TRUE,
   y = vhb.alltime,
   method.args = list(family = quasibinomial),
@@ -491,7 +562,7 @@ t1 <- tbl_uvregression(
 
 m <-
   svyglm(
-    vhb.alltime ~ geo + sex + date.vx + age + ethnicity + edu + civil,
+    vhb.alltime ~ geo + sex + date.vx + age + edu + birthplace,
     design = d5,
     family = "quasibinomial"
   )
@@ -504,8 +575,7 @@ t2 <- tbl_regression(
     date.vx ~ "Born before vaccination policy",
     age ~ "Age",
     edu ~ "Education",
-    ethnicity ~ "Ethnic group",
-    civil ~ "Civil status"
+    birthplace ~ "Place of birth"
   ),
   exponentiate = TRUE
 ) |>

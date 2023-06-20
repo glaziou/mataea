@@ -236,6 +236,8 @@ mata[diabete != 99, diabetes := droplevels(as_factor(diabete))]
 levels(mata$diabetes) <- c("Non diabetic", "Pre-diabetes", "Type-2 diabetes")
 
 mata[hypercholesterolemia_bool != 99, hyperchol := droplevels(as_factor(hypercholesterolemia_bool))]
+mata[, birthplace := droplevels(as_factor(birth_place))]
+levels(mata$birthplace) <- c("French Polynesia", "Outside French Polynesia")
 
 
 # update weights
