@@ -78,7 +78,7 @@ d5 <- survey::svydesign(
     vhb,
     vhb.HBs,
     vhb.alltime,
-    fib4,
+    fib4=relevel(fib4, ref="Cat 1-2"),
     diabetes,
     hyperchol
   )]
@@ -445,6 +445,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
   remove_row_type(type='header')
 
 ```
@@ -464,6 +465,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
+  remove_row_type(type = 'level', level_value = 'Negative') |>
   remove_row_type(type='header')
 
 ```
@@ -485,7 +487,7 @@ t1 <- tbl_uvregression(
     age ~ "Age",
     edu ~ "Education"
   ),
-  include = c('geo', 'sex', 'age', 'edu', 'civil'),
+  include = c('geo', 'sex', 'age', 'edu'),
   hide_n = TRUE,
   y = vhb.HBs,
   method.args = list(family = quasibinomial),
@@ -500,7 +502,7 @@ t1 <- tbl_uvregression(
 
 m <-
   svyglm(
-    vhb.HBs ~ geo + sex + age + edu + civil,
+    vhb.HBs ~ geo + sex + age + edu,
     design = d5,
     family = "quasibinomial"
   )
@@ -547,7 +549,7 @@ t1 <- tbl_uvregression(
     edu ~ "Education",
     birthplace ~ "Place of birth"
   ),
-  include = c('geo', 'sex', 'date.vx', 'age', 'edu','birthplace'),
+  include = c('geo', 'sex', 'date.vx', 'age', 'edu', 'birthplace'),
   hide_n = TRUE,
   y = vhb.alltime,
   method.args = list(family = quasibinomial),
@@ -617,7 +619,7 @@ tbl_svysummary(d5,
   )  |>
   modify_header(stat_0 = "**Fib-4 categories (95% CI)**") |>
   bold_labels() |>  
-  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
   remove_row_type(type='header')
 
 ```
@@ -636,7 +638,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
-  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
   remove_row_type(type='header')
 
 ```
@@ -656,7 +658,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
-  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
   remove_row_type(type='header')
 
 ```
@@ -676,7 +678,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
-  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
   remove_row_type(type='header')
 
 ```
@@ -695,10 +697,69 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
-  remove_row_type(type = 'level', level_value = 'Negative') |>
+  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
   remove_row_type(type='header')
 
 ```
 
+### Table 5.4.6 Fib-4 categories, quasi-binomial regressions (bivariate and multivariate) ajusted for sampling design effects
+
+```{r tab_5_4_6}
+t1 <- tbl_uvregression(
+  d5,
+  method = svyglm,
+  label = list(
+    vhb.alltime ~ "All-time VHB",
+    diabetes ~ "Type-2 diabetes",
+    obese ~ "Obesity",
+    hyperchol ~ "Hyperlipemia"
+  ),
+  include = c('vhb.alltime', 'diabetes','obese','hyperchol'),
+  hide_n = TRUE,
+  y = fib4,
+  method.args = list(family = quasibinomial),
+  exponentiate = TRUE
+) |>
+  add_global_p() |>
+  modify_header(update = list(estimate ~ "**OR (IC 95%)**")) |>
+  modify_footnote(estimate = "OR = rapport de cotes, IC = intervalle de confiance", abbreviation = TRUE)
+# add_significance_stars(hide_se = TRUE,
+#                        hide_p = FALSE,
+#                        pattern = "{p.value}{stars}")
+
+m <-
+  svyglm(
+    fib4 ~ vhb.alltime + diabetes + obese + hyperchol,
+    design = d5,
+    family = "quasibinomial"
+  )
+
+t2 <- tbl_regression(
+  m,
+  label = list(
+    vhb.alltime ~ "All-time VHB",
+    diabetes ~ "Type-2 diabetes",
+    obese ~ "Obesity",
+    hyperchol ~ "Hyperlipemia"
+  ),
+  exponentiate = TRUE
+) |>
+  modify_header(update = list(estimate ~ "**aOR (IC 95%)**")) |>
+  modify_footnote(estimate = "aOR = Adjusted odds ratio", abbreviation = TRUE) |>
+  add_global_p()
+# add_significance_stars(
+#   hide_se = TRUE,
+#   hide_p = FALSE,
+#   pattern = "{p.value}{stars}"
+# )
+# modify_footnote(everything() ~ NA, abbreviation = TRUE)
+
+tbl_merge(
+  tbls        = list(t1, t2),
+  tab_spanner = c("**Univariate analysis**", "**Multivariate analysis**")
+)
+
+
+```
 
 
