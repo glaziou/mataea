@@ -78,7 +78,7 @@ d5 <- survey::svydesign(
     vhb,
     vhb.HBs,
     vhb.alltime,
-    fib4=relevel(fib4, ref="Cat 1-2"),
+    fib4=relevel(fib4, ref="Normal"),
     diabetes,
     hyperchol
   )]
@@ -658,7 +658,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
-  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
+  remove_row_type(type = 'level', level_value = 'Normal') |>
   remove_row_type(type='header')
 
 ```
@@ -678,7 +678,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
-  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
+  remove_row_type(type = 'level', level_value = 'Normal') |>
   remove_row_type(type='header')
 
 ```
@@ -697,7 +697,7 @@ tbl_svysummary(d5,
     statistic = list(all_categorical() ~ "{conf.low} - {conf.high}")
   )  |>
   bold_labels() |>
-  remove_row_type(type = 'level', level_value = 'Cat 1-2') |>
+  remove_row_type(type = 'level', level_value = 'Normal') |>
   remove_row_type(type='header')
 
 ```
