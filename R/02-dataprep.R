@@ -188,7 +188,7 @@ mata[!is.na(vhb), vhb.HBs := 0]
 mata[vhb %in% c("HBs carrier"), vhb.HBs := 1]
 mata[, vhb.HBs := factor(vhb.HBs,
                          levels = 0:1,
-                         labels = c("Negative", "Positive"))]
+                         labels = c("Negative", "HbS carrier"))]
 
 mata[!is.na(vhb), vhb.alltime := 0]
 mata[vhb %in% c("HBs carrier","Healed infection"), vhb.alltime := 1]
