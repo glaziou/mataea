@@ -36,6 +36,21 @@ load(here('data/rep.rdata'))
 
 ```
 
+## Counts of cases and percent of sample, selected variables 
+
+```{r tab_5_0_1}
+tbl_summary(mata[, .(vhb, vhb.alltime, fib4, obese, diabetes, hyperlipidemia)],
+            label = list(vhb ~ "VHB profile",
+                         vhb.alltime ~ "All-time VHB",
+                         fib4 ~"Fib-4",
+                         obese ~ "Obesity",
+                         diabetes ~ "Diabetes",
+                         hyperlipidemia ~"Hyperlipidemia"),
+            type = list(hyperlipidemia ~"categorical"))
+
+```
+
+
 
 ## 5.1 VHB serological profiles
 
