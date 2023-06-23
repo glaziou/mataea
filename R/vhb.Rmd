@@ -79,8 +79,9 @@ d5 <- survey::svydesign(
     vhb.HBs,
     vhb.alltime,
     fib4=relevel(fib4, ref="Normal"),
-    diabetes,
-    hyperchol
+    diabetes=relevel(factor(diabetes), ref="No"),
+    hyperchol,
+    hyperlipidemia=relevel(factor(hyperlipidemia), ref="No")
   )]
 )
 
@@ -683,13 +684,13 @@ tbl_svysummary(d5,
 
 ```
 
-### Table 5.4.5 Fib-4 categories by hypercholesterolemia status
+### Table 5.4.5 Fib-4 categories by hyperlipidemia status
 
 ```{r tab_5_4_5}
 tbl_svysummary(d5,
                include = c(fib4),
                missing = 'no',
-               by = hyperchol,
+               by = hyperlipidemia,
                statistic = list(all_categorical() ~ "{p}")) |>
   modify_header(label ~ "**Fib-4 categories**") |>
   add_ci(
@@ -709,12 +710,12 @@ t1 <- tbl_uvregression(
   d5,
   method = svyglm,
   label = list(
-    vhb.alltime ~ "All-time VHB",
+    vhb ~ "HbS positive",
     diabetes ~ "Type-2 diabetes",
     obese ~ "Obesity",
-    hyperchol ~ "Hyperlipemia"
+    hyperlipidemia ~ "Hyperlipidemia"
   ),
-  include = c('vhb.alltime', 'diabetes','obese','hyperchol'),
+  include = c('vhb', 'diabetes','obese','hyperlipidemia'),
   hide_n = TRUE,
   y = fib4,
   method.args = list(family = quasibinomial),
@@ -729,7 +730,7 @@ t1 <- tbl_uvregression(
 
 m <-
   svyglm(
-    fib4 ~ vhb.alltime + diabetes + obese + hyperchol,
+    fib4 ~ vhb + diabetes + obese + hyperlipidemia,
     design = d5,
     family = "quasibinomial"
   )
@@ -737,10 +738,10 @@ m <-
 t2 <- tbl_regression(
   m,
   label = list(
-    vhb.alltime ~ "All-time VHB",
+    vhb ~ "HbS positive",
     diabetes ~ "Type-2 diabetes",
     obese ~ "Obesity",
-    hyperchol ~ "Hyperlipemia"
+    hyperlipidemia ~ "Hyperlipidemia"
   ),
   exponentiate = TRUE
 ) |>

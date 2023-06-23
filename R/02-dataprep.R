@@ -232,10 +232,23 @@ mata$civil <- droplevels(mata$civil)
 mata[fib_4_cat != 99 & !is.na(vhb), fib4 := droplevels(as_factor(fib_4_cat))]
 levels(mata$fib4) <- c("Normal", "Normal", "Parcours de soin")
 
-mata[diabete != 99, diabetes := droplevels(as_factor(diabete))]
-levels(mata$diabetes) <- c("Non-diabetic", "Non-diabetic", "Type-2 diabetes")
+# mata[diabete != 99, diabetes := droplevels(as_factor(diabete))]
+# levels(mata$diabetes) <- c("Non-diabetic", "Non-diabetic", "Type-2 diabetes")
+mata[diabete_measured_last_year == "Yes" |
+     diabete_medic_last_2weeks == "Yes" |
+     res_hba1g >= 6.5, diabetes := "Diabetes"]
+mata[res_hba1g < 6.5 & is.na(diabetes), diabetes := "No"]
+
 
 mata[hypercholesterolemia_bool != 99, hyperchol := droplevels(as_factor(hypercholesterolemia_bool))]
+mata[res_ct_cat == 1 |
+       res_ldlc_ldlc_cat == 1 |
+       res_tg_cat == 1 | res_hdl_hdl_cat == -1, hyperlipidemia := "Yes"]
+mata[is.na(hyperlipidemia) &
+       (!is.na(res_ct) |
+          !is.na(res_ldlc_ldlc) |
+          !is.na(res_tg) | !is.na(res_hdl_hdl)), hyperlipidemia := "No"]
+
 mata[, birthplace := droplevels(as_factor(birth_place))]
 levels(mata$birthplace) <- c("French Polynesia", "Outside French Polynesia")
 
